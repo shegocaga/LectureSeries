@@ -14,7 +14,7 @@ mesh = bmesh.from_edit_mesh(bpy.context.active_object.data)
 bmesh.ops.rotate(
     mesh,
     verts=mesh.verts,
-    cent=(0.0, 1.0, 0.0),
-    matrix=mathutils.Matrix.Rotation(math.radians(90.0), 3, 'Z'))
+    cent=(1.0, 1.0, 0.0),
+    matrix=mathutils.Matrix.Rotation(math.radians(90.0), 3, 'X'))
     
 #bpy.context.scene.update()
