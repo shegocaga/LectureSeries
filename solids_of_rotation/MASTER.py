@@ -13,12 +13,12 @@ import mathutils, math
 def printt(object):
     print('\n'.join(dir(object)))
 
-NUMVERTS = 36
+NUMVERTS = 16
 Dphi = 2*pi/NUMVERTS
 # calculate x,y coordinate pairs
 coords = [(cos(i*Dphi),sin(i*Dphi),0) for i in range(NUMVERTS)]
 obj_name = "kimi"
-rings = NUMVERTS
+rings = 12
 
 bm = bmesh.new()
 for v in coords:
@@ -49,7 +49,7 @@ for i in range(1,rings):
     vgs.append(vs_indices)
     #vg = bm.vertex_groups.new(name=obj_name+'_'+str(i))
     #vg.add(vs_indices, 1.0, 'ADD')
-    bmesh.ops.rotate(bm, verts=vs, cent=(0.0, 2.0, 0.0), matrix=mathutils.Matrix.Rotation(math.radians(360/rings), 3, 'X'))
+    #bmesh.ops.rotate(bm, verts=vs, cent=(0.0, 2.0, 0.0), matrix=mathutils.Matrix.Rotation(math.radians(360/rings), 3, 'X'))
 
 
 
