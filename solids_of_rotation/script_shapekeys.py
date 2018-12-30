@@ -31,37 +31,36 @@ mesh = obj.data
 current_mode = bpy.context.active_object.mode
 
 #PROOF OF CONCEPT: 
-frm = 20
-bpy.context.scene.frame_set(frm)
-bpy.ops.object.mode_set(mode='OBJECT')
-bpy.ops.object.shape_key_add(from_mix=False)
-bpy.ops.object.mode_set(mode='EDIT')    
-rotate(obj, 0, 30)
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.object.mode_set(mode='OBJECT')
+#frm = 20
+#bpy.context.scene.frame_set(frm)
+#bpy.ops.object.mode_set(mode='OBJECT')
+#bpy.ops.object.shape_key_add(from_mix=False)
+#bpy.ops.object.mode_set(mode='EDIT')    
+#rotate(obj, 0, 30)
+#bpy.ops.object.mode_set(mode='EDIT')
+#bpy.ops.object.mode_set(mode='OBJECT')
 
-#for i in range(10):
-#    frm = i*5
-#    bpy.context.scene.frame_set(frm)
-#    bpy.ops.object.mode_set(mode='OBJECT')
-#    bpy.ops.object.shape_key_add(from_mix=False)
-#    bpy.ops.object.mode_set(mode='EDIT')    
-#    if current_mode == 'OBJECT':
-#        shapeshift(obj)
-#        #rotate(obj, 30)
-#        bpy.ops.object.mode_set(mode='EDIT')
-#        bpy.ops.object.mode_set(mode='OBJECT')
-#    if current_mode == 'EDIT':
-#        rotate(obj, 30)
-#        bpy.ops.object.mode_set(mode='EDIT')
-#        bpy.ops.object.mode_set(mode='OBJECT')
-#    if i != 0:
-#        obj.data.shape_keys.key_blocks['Key ' + str(i)].value = 0
-#        obj.data.shape_keys.key_blocks['Key ' + str(i)].keyframe_insert("value",frame=frm)
-#        frm = (i+1)*5
-#        obj.data.shape_keys.key_blocks['Key ' + str(i)].value = 1
-#        obj.data.shape_keys.key_blocks['Key ' + str(i)].keyframe_insert("value",frame=frm)
-    
+PHI = 120  #Over what angle will this animation take?
+STEPS = 10 #How frames will each slice take? 
+SLICES = 13 #How many slices are there?
+
+for i in range(SLICES):
+    frm = i*STEPS
+    bpy.context.scene.frame_set(frm)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.shape_key_add(from_mix=False)
+    bpy.ops.object.mode_set(mode='EDIT')    
+    for j in range(SLICES-i):
+        rotate(obj, j, (PHI/SLICES))
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    if i != 0:
+        obj.data.shape_keys.key_blocks['Key ' + str(i)].value = 0
+        obj.data.shape_keys.key_blocks['Key ' + str(i)].keyframe_insert("value",frame=frm)
+        frm = (i+1)*STEPS
+        obj.data.shape_keys.key_blocks['Key ' + str(i)].value = 1
+        obj.data.shape_keys.key_blocks['Key ' + str(i)].keyframe_insert("value",frame=frm)
+
         
 #bpy.context.object.active_shape_key_index = 2
 #bpy.data.shape_keys["Key.008"].key_blocks["Key 2"].value = 1
