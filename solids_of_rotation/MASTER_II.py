@@ -2,6 +2,10 @@
 # Other useful topics: 
 #   Add keyframe to any data_path (in this case, bevel_end): https://blender.stackexchange.com/questions/34590/how-to-find-the-data-path-for-scripted-keyframes
 #   Scripting Curves in blender: https://medium.com/@behreajj/scripting-curves-in-blender-with-python-c487097efd13
+#   Change origin of object:
+#       - https://blenderartists.org/t/modifying-object-origin-with-python/507305
+#       - https://blender.stackexchange.com/questions/70098/how-to-move-an-objects-origin-to-the-center-of-its-bounding-box
+#       - https://docs.blender.org/api/blender_python_api_2_70_5/bpy.ops.object.html
 
 
 import bpy, bmesh
@@ -72,7 +76,7 @@ NUMVERTS = 128
 Dphi = 2*pi/NUMVERTS
 MAJOR_RADIUS = LBOUND
 # calculate x,y coordinate pairs
-coords = [(MAJOR_RADIUS*cos(i*Dphi),0,MAJOR_RADIUS*sin(i*Dphi)) for i in range(NUMVERTS)]
+coords = [(MAJOR_RADIUS*cos(i*Dphi),0,MAJOR_RADIUS*sin(-i*Dphi)) for i in range(NUMVERTS)]
 
 # create the Curve Datablock
 curveData = bpy.data.curves.new('extrude_curve', type='CURVE')
@@ -85,11 +89,15 @@ polyline.points.add(len(coords)+1)
 for i, coord in enumerate(coords):
     x,y,z = coord
     polyline.points[i].co = (x, y, z, 1)
+    polyline.points[i].tilt = pi/2
 
 x1,y1,z1 = coords[0]
 polyline.points[len(coords)].co = (x1, y1, z1, 1)
+polyline.points[len(coords)].tilt = pi/2
+
 x2,y2,z2 = coords[1]
 polyline.points[len(coords)+1].co = (x2, y2, z2, 1)
+polyline.points[len(coords)+1].tilt = pi/2
 
 # create Object
 curveOB = bpy.data.objects.new('extrude_curve', curveData)
