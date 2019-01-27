@@ -253,6 +253,13 @@ curve = ob.data
 curve.bevel_object = bevel
 curve.use_fill_caps = True
 
+# Add color
+color = (1,1,1)
+activeObject = bpy.context.active_object
+mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
+activeObject.data.materials.append(mat)
+bpy.context.object.active_material.diffuse_color = color
+
 
 ###############
 ### Animate ###
@@ -278,3 +285,6 @@ bpy.ops.object.camera_add(location=(0,3,20), rotation = (0,-0,0))
 
 #scene.render.alpha_mode = 'SKY' # in ['TRANSPARENT', 'SKY']
 #bpy.data.node_groups["Shader Nodetree"].nodes["Background"].inputs[0].default_value = (1,1,1,1)
+
+bpy.context.scene.render.use_freestyle = True
+#bpy.context.scene.render.line_thickness = 0
