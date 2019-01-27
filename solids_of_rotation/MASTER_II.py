@@ -6,6 +6,9 @@
 #       - https://blenderartists.org/t/modifying-object-origin-with-python/507305
 #       - https://blender.stackexchange.com/questions/70098/how-to-move-an-objects-origin-to-the-center-of-its-bounding-box
 #       - https://docs.blender.org/api/blender_python_api_2_70_5/bpy.ops.object.html
+#   Cycles Nodes: 
+#       - https://blender.stackexchange.com/questions/23436/control-cycles-material-nodes-and-material-properties-in-python
+#       - https://blender.stackexchange.com/questions/8475/python-set-material-to-material-slot
 
 
 import bpy, bmesh
@@ -14,6 +17,7 @@ from mathutils import Vector
 import mathutils, math
 import pdb
 from mathutils import Vector
+import colorsys
 
 def printt(object):
     print('\n'.join(dir(object)))
@@ -109,6 +113,13 @@ curveOB.select = True
 ob = bpy.context.scene.objects["plot_path"]
 curve = ob.data
 
+# Add color
+color = colorsys.hsv_to_rgb(0,0,0)
+activeObject = bpy.context.active_object
+mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
+activeObject.data.materials.append(mat)
+bpy.context.object.active_material.diffuse_color = color
+
 #############################################################
 ### Create bevel object from custom curve to bezier curve ###
 #############################################################
@@ -196,7 +207,7 @@ bevel = bpy.context.scene.objects["cross_section"]
 #bpy.ops.curve.primitive_bezier_circle_add()
 #ob = bpy.context.scene.objects["BezierCircle"]
 #bpy.ops.curve.primitive_bezier_curve_add()
-NUMVERTS = 128
+NUMVERTS = 512
 Dphi = 2*pi/NUMVERTS
 MAJOR_RADIUS = LBOUND
 # calculate x,y coordinate pairs
@@ -253,3 +264,17 @@ curve.keyframe_insert("bevel_factor_end", frame=31)
 bpy.context.scene.frame_current = 50
 curve.bevel_factor_end = 1
 curve.keyframe_insert("bevel_factor_end", frame=50)
+
+
+###############################
+###############################
+##### Add Lamp and Camera #####
+###############################
+###############################
+
+bpy.ops.object.lamp_add(type='POINT', location=(0,0,25))
+bpy.context.object.data.energy = 15
+bpy.ops.object.camera_add(location=(0,3,20), rotation = (0,-0,0))
+
+#scene.render.alpha_mode = 'SKY' # in ['TRANSPARENT', 'SKY']
+#bpy.data.node_groups["Shader Nodetree"].nodes["Background"].inputs[0].default_value = (1,1,1,1)
