@@ -55,17 +55,12 @@ Dphi = 2*pi/NUMVERTS
 coords = [(PLOT_THICKNESS*cos(i*Dphi),PLOT_THICKNESS*sin(-i*Dphi),0) for i in range(NUMVERTS)]
 
 # create the Curve Datablock
-curveData = bpy.data.curves.new('extrude_path', type='CURVE')
-curveData.dimensions = '3D'
-curveData.resolution_u = 2
-
-# create the Curve Datablock
-curveData = bpy.data.curves.new('myCurve', type='CURVE')
-curveData.dimensions = '3D'
-curveData.resolution_u = 2
+extrude_path_data = bpy.data.curves.new('extrude_path', type='CURVE')
+extrude_path_data.dimensions = '3D'
+extrude_path_data.resolution_u = 2
 
 # map coords to spline
-polyline = curveData.splines.new('POLY')
+polyline = extrude_path_data.splines.new('POLY')
 polyline.points.add(len(coords))
 
 for i, coord in enumerate(coords):
@@ -76,34 +71,34 @@ xf,yf,zf = coords[0]
 polyline.points[len(coords)].co = (xf, yf, zf, 1)
 
 # create Object
-curveOB = bpy.data.objects.new('plot_cross_section', curveData)
+plotOB = bpy.data.objects.new('extrude_path_object', extrude_path_data)
 
 # attach to scene and validate context
 scn = bpy.context.scene
-scn.objects.link(curveOB)
-scn.objects.active = curveOB
-curveOB.select = True
+scn.objects.link(plotOB)
+scn.objects.active = plotOB
+plotOB.select = True
 
-bevel_plot = bpy.context.scene.objects["plot_cross_section"]
+bevel_plot = bpy.context.scene.objects["extrude_path_object"]
 
 
 #######################################################################
 ### Add plot as a path of extrusion (for drawing of plot animation) ###
 #######################################################################
 
-curveData = bpy.data.curves.new('plot_path', type='CURVE')
-curveData.dimensions = '3D'
-curveData.resolution_u = 2
+plot_path_data = bpy.data.curves.new('plot_path', type='CURVE')
+plot_path_data.dimensions = '3D'
+plot_path_data.resolution_u = 2
 
 # map coords to spline 
-polyline = curveData.splines.new('POLY')
+polyline = plot_path_data.splines.new('POLY')
 polyline.points.add(len(plot)-1)
 for i, pt in enumerate(plot):
     x,y,z = pt
     polyline.points[i].co = (x, y, z, 1)
 
 # create Object
-curveOB = bpy.data.objects.new('plot_path', curveData)
+curveOB = bpy.data.objects.new('plot_path', plot_path_data)
 
 # attach to scene and validate context
 scn = bpy.context.scene
@@ -175,6 +170,8 @@ curveOB = bpy.data.objects.new('cross_section', curveData)
 # attach to scene and validate context
 scn = bpy.context.scene
 scn.objects.link(curveOB)
+for obj in bpy.data.objects:
+    obj.select = False
 scn.objects.active = curveOB
 curveOB.select = True
 
