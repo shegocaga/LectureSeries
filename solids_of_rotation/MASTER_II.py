@@ -58,7 +58,7 @@ polyline.points[len(coords)+1].co = (xf, yf, zf, 1)
 polyline.points[len(coords)+2].co = (xi, yi, zi, 1)
 
 # create Object
-curveOB = bpy.data.objects.new('myCurve2', curveData)
+curveOB = bpy.data.objects.new('cross_section', curveData)
 
 # attach to scene and validate context
 scn = bpy.context.scene
@@ -66,9 +66,22 @@ scn.objects.link(curveOB)
 scn.objects.active = curveOB
 curveOB.select = True
 
-bevel = bpy.context.scene.objects["myCurve2"]
+## Set origin of cross section to same radius as extrude_path: https://blenderartists.org/t/modifying-object-origin-with-python/507305
+# store the location of current 3d cursor
+saved_location = bpy.context.scene.cursor_location  # returns a vector
 
-### Add Curve to extrude along ###
+# give 3dcursor new coordinates
+bpy.context.scene.cursor_location = Vector((LBOUND,0.0,0.0))
+
+# set the origin on the current object to the 3dcursor location
+bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+
+# set 3dcursor location back to the stored location
+bpy.context.scene.cursor_location = saved_location
+
+bevel = bpy.context.scene.objects["cross_section"]
+
+### Add path of extrusion ###
 #bpy.ops.curve.primitive_bezier_circle_add()
 #ob = bpy.context.scene.objects["BezierCircle"]
 #bpy.ops.curve.primitive_bezier_curve_add()
@@ -76,10 +89,10 @@ NUMVERTS = 128
 Dphi = 2*pi/NUMVERTS
 MAJOR_RADIUS = LBOUND
 # calculate x,y coordinate pairs
-coords = [(MAJOR_RADIUS*cos(i*Dphi),0,MAJOR_RADIUS*sin(-i*Dphi)) for i in range(NUMVERTS)]
+coords = [(LBOUND*cos(i*Dphi),0,LBOUND*sin(-i*Dphi)) for i in range(NUMVERTS)]
 
 # create the Curve Datablock
-curveData = bpy.data.curves.new('extrude_curve', type='CURVE')
+curveData = bpy.data.curves.new('extrude_path', type='CURVE')
 curveData.dimensions = '3D'
 curveData.resolution_u = 2
 
@@ -100,7 +113,7 @@ polyline.points[len(coords)+1].co = (x2, y2, z2, 1)
 polyline.points[len(coords)+1].tilt = pi/2
 
 # create Object
-curveOB = bpy.data.objects.new('extrude_curve', curveData)
+curveOB = bpy.data.objects.new('extrude_path', curveData)
 
 # attach to scene and validate context
 scn = bpy.context.scene
@@ -108,12 +121,12 @@ scn.objects.link(curveOB)
 scn.objects.active = curveOB
 curveOB.select = True
 
-ob = bpy.context.scene.objects["extrude_curve"]
+ob = bpy.context.scene.objects["extrude_path"]
 curve = ob.data
 
 
 ### Create bevel object from custom curve to bezier curve ###
-#bpy.context.object.data.bevel_object = bpy.data.objects["myCurve2"]
+#bpy.context.object.data.bevel_object = bpy.data.objects["cross_section"]
 curve.bevel_object = bevel
 curve.use_fill_caps = True
 
