@@ -21,20 +21,43 @@ def printt(object):
 # Move cursor to origin: Shift+C
 # Center camera to cursor: Alt+Home
 
-### From bezier_curve_from_coords.py: Add curve that needs rotation ###
+######################################
+### Store plot as series of points ###
+######################################
 # sample data
 #coords = [(1,1,0), (-1,1,0), (-1,-1,0), (1, -1, 0)]
 #NUMVERTS = 5
 #Dphi = 2*pi/NUMVERTS
 # calculate x,y coordinate pairs
 def fun(x):
-    return (x**2)/4+0.75
+    return (x-8)**2/9+1
 
-LBOUND = 1
-RBOUND = 4
+PLOT_THICKNESS = 0.01
+LBOUND = 2
+RBOUND = 6
 INCR = 0.1
-NUMVERTS = int(round((RBOUND-LBOUND)/INCR))
-coords = [(LBOUND+i*INCR,fun(LBOUND+i*INCR),0) for i in range(NUMVERTS)]
+NUMVERTS = int(round((RBOUND-LBOUND)/INCR))+1
+plot = [(LBOUND+i*INCR,fun(LBOUND+i*INCR),0) for i in range(NUMVERTS)]
+
+##########################
+##########################
+##### Plot function ######
+##########################
+##########################
+
+#######################################################################
+### From bezier_curve_from_coords.py: Add curve that needs rotation ###
+#######################################################################
+
+NUMVERTS = 128
+Dphi = 2*pi/NUMVERTS
+# calculate x,y coordinate pairs
+coords = [(PLOT_THICKNESS*cos(i*Dphi),PLOT_THICKNESS*sin(-i*Dphi),0) for i in range(NUMVERTS)]
+
+# create the Curve Datablock
+curveData = bpy.data.curves.new('extrude_path', type='CURVE')
+curveData.dimensions = '3D'
+curveData.resolution_u = 2
 
 # create the Curve Datablock
 curveData = bpy.data.curves.new('myCurve', type='CURVE')
@@ -43,19 +66,108 @@ curveData.resolution_u = 2
 
 # map coords to spline
 polyline = curveData.splines.new('POLY')
-polyline.points.add(len(coords)+2)
+polyline.points.add(len(coords))
+
+for i, coord in enumerate(coords):
+    x,y,z = coord
+    polyline.points[i].co = (x, y, z, 1)
+
+xf,yf,zf = coords[0]
+polyline.points[len(coords)].co = (xf, yf, zf, 1)
+
+# create Object
+curveOB = bpy.data.objects.new('plot_cross_section', curveData)
+
+# attach to scene and validate context
+scn = bpy.context.scene
+scn.objects.link(curveOB)
+scn.objects.active = curveOB
+curveOB.select = True
+
+bevel_plot = bpy.context.scene.objects["plot_cross_section"]
+
+
+#######################################################################
+### Add plot as a path of extrusion (for drawing of plot animation) ###
+#######################################################################
+
+curveData = bpy.data.curves.new('plot_path', type='CURVE')
+curveData.dimensions = '3D'
+curveData.resolution_u = 2
+
+# map coords to spline 
+polyline = curveData.splines.new('POLY')
+polyline.points.add(len(plot)-1)
+for i, pt in enumerate(plot):
+    x,y,z = pt
+    polyline.points[i].co = (x, y, z, 1)
+
+# create Object
+curveOB = bpy.data.objects.new('plot_path', curveData)
+
+# attach to scene and validate context
+scn = bpy.context.scene
+scn.objects.link(curveOB)
+scn.objects.active = curveOB
+curveOB.select = True
+
+ob = bpy.context.scene.objects["plot_path"]
+curve = ob.data
+
+#############################################################
+### Create bevel object from custom curve to bezier curve ###
+#############################################################
+#bpy.context.object.data.bevel_object = bpy.data.objects["cross_section"]
+curve.bevel_object = bevel_plot
+curve.use_fill_caps = True
+
+
+###############
+### Animate ###
+###############
+bpy.context.scene.frame_current = 1
+curve.bevel_factor_end = 0
+curve.keyframe_insert("bevel_factor_end", frame=1)
+
+bpy.context.scene.frame_current = 20
+curve.bevel_factor_end = 1
+curve.keyframe_insert("bevel_factor_end", frame=20)
+
+
+
+
+
+########################################
+########################################
+##### Rotate Plane to make a solid #####
+########################################
+########################################
+
+
+#######################################################################
+### From bezier_curve_from_coords.py: Add curve that needs rotation ###
+#######################################################################
+
+# create the Curve Datablock
+curveData = bpy.data.curves.new('myCurve', type='CURVE')
+curveData.dimensions = '3D'
+curveData.resolution_u = 2
+
+# map coords to spline
+polyline = curveData.splines.new('POLY')
+polyline.points.add(len(plot)+2)
 
 xi,yi,zi = (LBOUND, 0, 0)
 polyline.points[0].co = (xi, yi, zi, 1)
 
-for i, coord in enumerate(coords):
+for i, coord in enumerate(plot):
     x,y,z = coord
     polyline.points[i+1].co = (x, y, z, 1)
 
 xf,yf,zf = (RBOUND, 0, 0)
-polyline.points[len(coords)+1].co = (xf, yf, zf, 1)
+polyline.points[len(plot)+1].co = (xf, yf, zf, 1)
 
-polyline.points[len(coords)+2].co = (xi, yi, zi, 1)
+polyline.points[len(plot)+2].co = (xi, yi, zi, 1)
 
 # create Object
 curveOB = bpy.data.objects.new('cross_section', curveData)
@@ -81,7 +193,9 @@ bpy.context.scene.cursor_location = saved_location
 
 bevel = bpy.context.scene.objects["cross_section"]
 
+#############################
 ### Add path of extrusion ###
+#############################
 #bpy.ops.curve.primitive_bezier_circle_add()
 #ob = bpy.context.scene.objects["BezierCircle"]
 #bpy.ops.curve.primitive_bezier_curve_add()
@@ -124,19 +238,21 @@ curveOB.select = True
 ob = bpy.context.scene.objects["extrude_path"]
 curve = ob.data
 
-
+#############################################################
 ### Create bevel object from custom curve to bezier curve ###
+#############################################################
 #bpy.context.object.data.bevel_object = bpy.data.objects["cross_section"]
 curve.bevel_object = bevel
 curve.use_fill_caps = True
 
 
-
+###############
 ### Animate ###
-bpy.context.scene.frame_current = 1
+###############
+bpy.context.scene.frame_current = 31
 curve.bevel_factor_end = 0
-curve.keyframe_insert("bevel_factor_end", frame=1)
+curve.keyframe_insert("bevel_factor_end", frame=31)
 
-bpy.context.scene.frame_current = 20
+bpy.context.scene.frame_current = 50
 curve.bevel_factor_end = 1
-curve.keyframe_insert("bevel_factor_end", frame=20)
+curve.keyframe_insert("bevel_factor_end", frame=50)
