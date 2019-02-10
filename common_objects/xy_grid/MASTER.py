@@ -21,9 +21,9 @@ def printt(object):
 d_tick = 1 #Time displacement between ticks
 d_grow = 4 #Time needed to grow line
 axis_extend = 1 #How far beyond the grids do the axis extend
-left_bound = -10
+left_bound = -2
 right_bound = 10
-lower_bound = -10
+lower_bound = -2
 upper_bound = 10
 x_step = 1
 y_step = 1
@@ -217,7 +217,7 @@ curve.keyframe_insert("bevel_factor_end", frame= t0_y_axis + d_grow )
 ##########################
 for iter in range(n_xbars):
     ### Add plot as a path of extrusion (for drawing of plot animation) ###
-    plot = [(left_bound+iter*x_step,-10,0),(left_bound+iter*x_step,10,0)]
+    plot = [(left_bound+iter*x_step,lower_bound,0),(left_bound+iter*x_step,upper_bound,0)]
 
     plot_path_data = bpy.data.curves.new('plot_path'+str(iter), type='CURVE')
     plot_path_data.dimensions = '3D'
@@ -266,7 +266,7 @@ for iter in range(n_xbars):
 ############################
 for iter in range(n_ybars):
     ### Add plot as a path of extrusion (for drawing of plot animation) ###
-    plot = [(-10,lower_bound + iter*y_step,0),(10,lower_bound + iter*y_step,0)]
+    plot = [(left_bound,lower_bound + iter*y_step,0),(right_bound,lower_bound + iter*y_step,0)]
 
     plot_path_horz_data = bpy.data.curves.new('plot_path_horz'+str(iter), type='CURVE')
     plot_path_horz_data.dimensions = '3D'
