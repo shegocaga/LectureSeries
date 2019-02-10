@@ -21,12 +21,15 @@ def printt(object):
 d_tick = 1 #Time displacement between ticks
 d_grow = 4 #Time needed to grow line
 axis_extend = 1 #How far beyond the grids do the axis extend
-left_bound = -2
-right_bound = 10
-lower_bound = -2
-upper_bound = 10
+left_bound = -5
+right_bound = 5
+lower_bound = -5
+upper_bound = 5
 x_step = 1
 y_step = 1
+
+ARROW_WIDTH = 0.5
+ARROW_HEIGHT = 1
 
 n_xbars = int((right_bound-left_bound)/x_step+1)
 n_ybars = int((upper_bound-lower_bound)/y_step+1)
@@ -78,6 +81,40 @@ scn.objects.active = plotOB
 plotOB.select = True
 
 axis_bevel = bpy.context.scene.objects["axis_cross_section"]
+
+######################################################
+### Add cross section of extrusion  for arrowheads ###
+######################################################
+# calculate x,y coordinate pairs
+coords = [(0,0,0),(0.5*ARROW_WIDTH,0,0),(0,ARROW_HEIGHT,0)]
+
+# create the Curve Datablock
+arrow_path = bpy.data.curves.new('arrow_cs', type='CURVE')
+arrow_path.dimensions = '3D'
+arrow_path.resolution_u = 2
+
+# map coords to spline
+polyline = arrow_path.splines.new('POLY')
+polyline.points.add(len(coords))
+
+for i, coord in enumerate(coords):
+    x,y,z = coord
+    polyline.points[i].co = (x, y, z, 1)
+
+xf,yf,zf = coords[0]
+polyline.points[len(coords)].co = (xf, yf, zf, 1)
+
+# create Object
+arrow_ob = bpy.data.objects.new('arrow_cs', arrow_path)
+
+# attach to scene and validate context
+scn = bpy.context.scene
+scn.objects.link(arrow_ob)
+scn.objects.active = arrow_ob
+arrow_ob.select = True
+
+arrow_bevel = bpy.context.scene.objects["arrow_cs"]
+
 
 ################################################
 ### Add cross section of extrusion  for grid ###
