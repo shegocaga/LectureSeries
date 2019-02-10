@@ -75,6 +75,8 @@ y_step = 1
 n_xbars = int((right_bound-left_bound)/x_step+1)
 n_ybars = int((upper_bound-lower_bound)/y_step+1)
 
+t0_y = (n_xbars-1)*d_tick + d_grow
+
 # Plot Vertical 
 for iter in range(n_xbars):
     plot = [(left_bound+iter*x_step,-10,0),(left_bound+iter*x_step,10,0)]
@@ -173,10 +175,10 @@ for iter in range(n_ybars):
     ###############
     ### Animate ###
     ###############
-    bpy.context.scene.frame_current = (iter)*d_tick + n_xbars*d_grow
+    bpy.context.scene.frame_current = (iter)*d_tick + t0_y
     curve.bevel_factor_end = 0
-    curve.keyframe_insert("bevel_factor_end", frame=(10+iter)*d_tick + n_xbars*d_grow)
+    curve.keyframe_insert("bevel_factor_end", frame=iter*d_tick + t0_y)
 
-    bpy.context.scene.frame_current = (iter)*d_tick + d_grow + n_xbars*d_grow
+    bpy.context.scene.frame_current = (iter)*d_tick + d_grow + t0_y
     curve.bevel_factor_end = 1
-    curve.keyframe_insert("bevel_factor_end", frame=(10+iter)*d_tick + d_grow + n_xbars*d_grow)
+    curve.keyframe_insert("bevel_factor_end", frame=iter*d_tick + d_grow + t0_y)
