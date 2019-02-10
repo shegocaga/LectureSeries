@@ -217,48 +217,73 @@ curve.keyframe_insert("bevel_factor_end", frame = 0)
 curve.bevel_factor_end = 1
 curve.keyframe_insert("bevel_factor_end", frame= d_grow)
 
-##############################
-### Plot x-axis arrowheads ###
-##############################
+#######################
+### Plot arrowheads ###
+#######################
+# Deselect All
+for obj in bpy.data.objects:
+    obj.select = False
 bpy.context.scene.cursor_location = saved_location
 NUMVERTS = 128
 Dphi = 2*pi/NUMVERTS
-# calculate x,y coordinate pairs
-coords = [(0.5*ARROW_WIDTH*cos(i*Dphi),upper_bound+axis_extend, 0.5*ARROW_WIDTH*sin(-i*Dphi)) for i in range(NUMVERTS)]
 
-plot_path_data = bpy.data.curves.new('top_arrowhead', type='CURVE')
-plot_path_data.dimensions = '3D'
-plot_path_data.resolution_u = 2
+for iter in range(4):
+    # Deselect All
+    for obj in bpy.data.objects:
+        obj.select = False
+    # calculate x,y coordinate pairs
+    coords = [(0.5*ARROW_WIDTH*cos(i*Dphi),0, 0.5*ARROW_WIDTH*sin(-i*Dphi)) for i in range(NUMVERTS)]
 
-# map coords to spline 
-polyline = plot_path_data.splines.new('POLY')
-polyline.points.add(len(coords)-1)
-for i, pt in enumerate(coords):
-    x,y,z = pt
-    polyline.points[i].co = (x, y, z, 1)
-    polyline.points[i].tilt = pi/2
+    plot_path_data = bpy.data.curves.new('arrowhead_'+str(iter), type='CURVE')
+    plot_path_data.dimensions = '3D'
+    plot_path_data.resolution_u = 2
 
-# create Object
-curveOB = bpy.data.objects.new('top_arrowhead', plot_path_data)
+    # map coords to spline 
+    polyline = plot_path_data.splines.new('POLY')
+    polyline.points.add(len(coords)-1)
+    for i, pt in enumerate(coords):
+        x,y,z = pt
+        polyline.points[i].co = (x, y, z, 1)
+        polyline.points[i].tilt = pi/2
 
-# attach to scene and validate context
-scn = bpy.context.scene
-scn.objects.link(curveOB)
-scn.objects.active = curveOB
-curveOB.select = True
+    # create Object
+    curveOB = bpy.data.objects.new('arrowhead_'+str(iter), plot_path_data)
 
-ob = bpy.context.scene.objects["top_arrowhead"]
-curve = ob.data
+    # attach to scene and validate context
+    scn = bpy.context.scene
+    scn.objects.link(curveOB)
+    scn.objects.active = curveOB
+    curveOB.select = True
 
-# Add color
-activeObject = bpy.context.active_object
-mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
-activeObject.data.materials.append(mat)
-bpy.context.object.active_material.diffuse_color = color_axis
+    ob = bpy.context.scene.objects['arrowhead_'+str(iter)]
+    curve = ob.data
 
-### Create bevel object from custom curve to bezier curve ###
-curve.bevel_object = bpy.context.scene.objects["arrow_cs"]
-curve.use_fill_caps = True
+    # Add color
+    activeObject = bpy.context.active_object
+    mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
+    activeObject.data.materials.append(mat)
+    bpy.context.object.active_material.diffuse_color = color_axis
+
+    ### Create bevel object from custom curve to bezier curve ###
+    curve.bevel_object = bpy.context.scene.objects["arrow_cs"]
+    curve.use_fill_caps = True
+
+### Re-orient ###
+ob = bpy.data.objects['arrowhead_0']
+ob.delta_location.x = right_bound+axis_extend
+ob.rotation_euler.z = -pi/2
+
+ob = bpy.data.objects['arrowhead_1']
+ob.delta_location.x = left_bound-axis_extend
+ob.rotation_euler.z = pi/2
+
+ob = bpy.data.objects['arrowhead_2']
+ob.delta_location.y = upper_bound+axis_extend
+
+ob = bpy.data.objects['arrowhead_3']
+ob.delta_location.y = lower_bound-axis_extend
+ob.rotation_euler.z = pi
+
 
 ### Animate ###
 curve.bevel_factor_end = 0
