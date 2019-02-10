@@ -286,11 +286,29 @@ ob.rotation_euler.z = pi
 
 
 ### Animate ###
-curve.bevel_factor_end = 0
-curve.keyframe_insert("bevel_factor_end", frame = 0)
+ob = bpy.context.scene.objects['arrowhead_0'].data
+ob.bevel_factor_end = 0
+ob.keyframe_insert("bevel_factor_end", frame = d_grow)
+ob.bevel_factor_end = 1
+ob.keyframe_insert("bevel_factor_end", frame= d_grow + d_grow )
 
-curve.bevel_factor_end = 1
-curve.keyframe_insert("bevel_factor_end", frame= d_grow)
+ob = bpy.context.scene.objects['arrowhead_1'].data
+ob.bevel_factor_end = 0
+ob.keyframe_insert("bevel_factor_end", frame = 2*d_grow)
+ob.bevel_factor_end = 1
+ob.keyframe_insert("bevel_factor_end", frame= 3*d_grow )
+
+ob = bpy.context.scene.objects['arrowhead_2'].data
+ob.bevel_factor_end = 0
+ob.keyframe_insert("bevel_factor_end", frame = t0_y_axis+d_grow)
+ob.bevel_factor_end = 1
+ob.keyframe_insert("bevel_factor_end", frame= t0_y_axis+2*d_grow )
+
+ob = bpy.context.scene.objects['arrowhead_3'].data
+ob.bevel_factor_end = 0
+ob.keyframe_insert("bevel_factor_end", frame= t0_y_axis+2*d_grow)
+ob.bevel_factor_end = 1
+ob.keyframe_insert("bevel_factor_end", frame= t0_y_axis+3*d_grow )
 
 ###################
 ### Plot y-axis ###
