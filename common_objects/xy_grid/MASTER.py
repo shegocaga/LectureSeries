@@ -58,13 +58,11 @@ plotOB.select = True
 
 bevel_plot = bpy.context.scene.objects["extrude_path_object"]
 
-
-#######################################################################
-### Add plot as a path of extrusion (for drawing of plot animation) ###
-#######################################################################
-
-d_tick = 1.5 #Time displacement between ticks
-d_grow = 6 #Time needed to grow line
+#################
+### CONSTANTS ###
+#################
+d_tick = 1 #Time displacement between ticks
+d_grow = 4 #Time needed to grow line
 left_bound = -10
 right_bound = 10
 lower_bound = -10
@@ -75,10 +73,19 @@ y_step = 1
 n_xbars = int((right_bound-left_bound)/x_step+1)
 n_ybars = int((upper_bound-lower_bound)/y_step+1)
 
-t0_y = (n_xbars-1)*d_tick + d_grow
+t0_pause = 6
+t0_y = (n_xbars-1)*d_tick + d_grow + t0_pause
 
-# Plot Vertical 
+#color = colorsys.hsv_to_rgb(0.45,0.45,0.45)
+color = (0.45, 0.45, 0.45)
+
+
+
+##########################
+### Plot Vertical Grid ###
+##########################
 for iter in range(n_xbars):
+    ### Add plot as a path of extrusion (for drawing of plot animation) ###
     plot = [(left_bound+iter*x_step,-10,0),(left_bound+iter*x_step,10,0)]
 
     plot_path_data = bpy.data.curves.new('plot_path'+str(iter), type='CURVE')
@@ -105,23 +112,17 @@ for iter in range(n_xbars):
     curve = ob.data
 
     # Add color
-    color = colorsys.hsv_to_rgb(0,0,0)
     activeObject = bpy.context.active_object
     mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
     activeObject.data.materials.append(mat)
     bpy.context.object.active_material.diffuse_color = color
 
-    #############################################################
     ### Create bevel object from custom curve to bezier curve ###
-    #############################################################
     #bpy.context.object.data.bevel_object = bpy.data.objects["cross_section"]
     curve.bevel_object = bevel_plot
     curve.use_fill_caps = True
 
-
-    ###############
     ### Animate ###
-    ###############
     bpy.context.scene.frame_current = (iter)*d_tick
     curve.bevel_factor_end = 0
     curve.keyframe_insert("bevel_factor_end", frame=(iter)*d_tick)
@@ -130,8 +131,12 @@ for iter in range(n_xbars):
     curve.bevel_factor_end = 1
     curve.keyframe_insert("bevel_factor_end", frame=(iter)*d_tick + d_grow)
 
-# Plot Horizontal 
+
+############################
+### Plot Horizontal Grid ###
+############################
 for iter in range(n_ybars):
+    ### Add plot as a path of extrusion (for drawing of plot animation) ###
     plot = [(-10,lower_bound + iter*y_step,0),(10,lower_bound + iter*y_step,0)]
 
     plot_path_horz_data = bpy.data.curves.new('plot_path_horz'+str(iter), type='CURVE')
@@ -158,23 +163,17 @@ for iter in range(n_ybars):
     curve = ob.data
 
     # Add color
-    color = colorsys.hsv_to_rgb(0,0,0)
     activeObject = bpy.context.active_object
     mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
     activeObject.data.materials.append(mat)
     bpy.context.object.active_material.diffuse_color = color
 
-    #############################################################
     ### Create bevel object from custom curve to bezier curve ###
-    #############################################################
     #bpy.context.object.data.bevel_object = bpy.data.objects["cross_section"]
     curve.bevel_object = bevel_plot
     curve.use_fill_caps = True
 
-
-    ###############
     ### Animate ###
-    ###############
     bpy.context.scene.frame_current = (iter)*d_tick + t0_y
     curve.bevel_factor_end = 0
     curve.keyframe_insert("bevel_factor_end", frame=iter*d_tick + t0_y)
@@ -182,3 +181,4 @@ for iter in range(n_ybars):
     bpy.context.scene.frame_current = (iter)*d_tick + d_grow + t0_y
     curve.bevel_factor_end = 1
     curve.keyframe_insert("bevel_factor_end", frame=iter*d_tick + d_grow + t0_y)
+
