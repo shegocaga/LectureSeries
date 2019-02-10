@@ -5,7 +5,6 @@ from math import *
 from mathutils import Vector
 import mathutils, math
 import pdb
-from mathutils import Vector
 import colorsys
 
 def printt(object):
@@ -14,6 +13,7 @@ def printt(object):
 # Move cursor to origin: Shift+C
 # Center camera to cursor: Alt+Home
 
+bpy.context.scene.cursor_location = Vector((0,0,0))
 
 #################
 ### CONSTANTS ###
@@ -82,6 +82,9 @@ plotOB.select = True
 
 axis_bevel = bpy.context.scene.objects["axis_cross_section"]
 
+for obj in bpy.data.objects:
+    obj.select = False
+
 ######################################################
 ### Add cross section of extrusion  for arrowheads ###
 ######################################################
@@ -113,8 +116,20 @@ scn.objects.link(arrow_ob)
 scn.objects.active = arrow_ob
 arrow_ob.select = True
 
+# Adjust "origin" of arrowhead path
+saved_location = Vector((0,0,0))  # returns a vector
+bpy.context.scene.cursor_location = Vector((0.5*ARROW_WIDTH,0.0,0.0))
+bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+bpy.context.scene.cursor_location = saved_location
+
+# Deselect All
+for obj in bpy.data.objects:
+    obj.select = False
+
 arrow_bevel = bpy.context.scene.objects["arrow_cs"]
 
+
+bpy.context.scene.cursor_location = saved_location
 
 ################################################
 ### Add cross section of extrusion  for grid ###
@@ -158,6 +173,7 @@ bevel_plot = bpy.context.scene.objects["extrude_path_object"]
 ###################
 ### Plot x-axis ###
 ###################
+bpy.context.scene.cursor_location = saved_location
 ### Add plot as a path of extrusion (for drawing of plot animation) ###
 plot = [(left_bound-axis_extend,0,0),(right_bound+axis_extend,0,0)]
 
@@ -201,6 +217,55 @@ curve.keyframe_insert("bevel_factor_end", frame = 0)
 curve.bevel_factor_end = 1
 curve.keyframe_insert("bevel_factor_end", frame= d_grow)
 
+##############################
+### Plot x-axis arrowheads ###
+##############################
+bpy.context.scene.cursor_location = saved_location
+NUMVERTS = 128
+Dphi = 2*pi/NUMVERTS
+# calculate x,y coordinate pairs
+coords = [(0.5*ARROW_WIDTH*cos(i*Dphi),upper_bound+axis_extend, 0.5*ARROW_WIDTH*sin(-i*Dphi)) for i in range(NUMVERTS)]
+
+plot_path_data = bpy.data.curves.new('top_arrowhead', type='CURVE')
+plot_path_data.dimensions = '3D'
+plot_path_data.resolution_u = 2
+
+# map coords to spline 
+polyline = plot_path_data.splines.new('POLY')
+polyline.points.add(len(coords)-1)
+for i, pt in enumerate(coords):
+    x,y,z = pt
+    polyline.points[i].co = (x, y, z, 1)
+    polyline.points[i].tilt = pi/2
+
+# create Object
+curveOB = bpy.data.objects.new('top_arrowhead', plot_path_data)
+
+# attach to scene and validate context
+scn = bpy.context.scene
+scn.objects.link(curveOB)
+scn.objects.active = curveOB
+curveOB.select = True
+
+ob = bpy.context.scene.objects["top_arrowhead"]
+curve = ob.data
+
+# Add color
+activeObject = bpy.context.active_object
+mat = bpy.data.materials.new(name="MaterialName") #set new material to variable
+activeObject.data.materials.append(mat)
+bpy.context.object.active_material.diffuse_color = color_axis
+
+### Create bevel object from custom curve to bezier curve ###
+curve.bevel_object = bpy.context.scene.objects["arrow_cs"]
+curve.use_fill_caps = True
+
+### Animate ###
+curve.bevel_factor_end = 0
+curve.keyframe_insert("bevel_factor_end", frame = 0)
+
+curve.bevel_factor_end = 1
+curve.keyframe_insert("bevel_factor_end", frame= d_grow)
 
 ###################
 ### Plot y-axis ###
